@@ -524,13 +524,27 @@ function handleNoClick(): void {
   growYesButton();
   createSadBunny();
   
-  // MOVE THE BUTTON - simple approach using transform
+  // MOVE THE BUTTON - keep it within viewport bounds
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
+  const btnRect = noBtn.getBoundingClientRect();
+  const btnWidth = btnRect.width;
+  const btnHeight = btnRect.height;
   
-  // Calculate random offset from original position
-  const offsetX = (Math.random() - 0.5) * (viewportWidth * 0.6);
-  const offsetY = (Math.random() - 0.5) * (viewportHeight * 0.4);
+  // Get the button's original position (center of viewport area where it started)
+  const btnOriginalX = btnRect.left + btnWidth / 2;
+  const btnOriginalY = btnRect.top + btnHeight / 2;
+  
+  // Calculate max offsets to keep at least 20px of button visible
+  const margin = 20;
+  const maxOffsetLeft = -(btnOriginalX - margin - btnWidth / 2);
+  const maxOffsetRight = viewportWidth - btnOriginalX - margin - btnWidth / 2;
+  const maxOffsetTop = -(btnOriginalY - margin - btnHeight / 2);
+  const maxOffsetBottom = viewportHeight - btnOriginalY - margin - btnHeight / 2;
+  
+  // Calculate random offset within bounds
+  const offsetX = Math.random() * (maxOffsetRight - maxOffsetLeft) + maxOffsetLeft;
+  const offsetY = Math.random() * (maxOffsetBottom - maxOffsetTop) + maxOffsetTop;
   
   // Calculate shrink and fade (faster - takes 10 clicks)
   const shrink = Math.max(0.3, 1 - (noAttempts * 0.07));
@@ -803,9 +817,9 @@ function handlePetBunny(): void {
     setTimeout(() => { petMessage.style.opacity = '0.7'; }, 1500);
   }
   
-  // Update counter - special display after 100
+  // Update counter - special display after 50
   if (petCounterEl) {
-    if (petCount > 100) {
+    if (petCount >= 50) {
       petCounterEl.textContent = `Infinite Love Mode: ${petCount} 🐾💕`;
     } else {
       petCounterEl.textContent = `Pets: ${petCount} 🐾`;
@@ -816,10 +830,10 @@ function handlePetBunny(): void {
   const petProgressFill = document.getElementById('pet-progress-fill');
   const petProgressText = document.getElementById('pet-progress-text');
   if (petProgressFill) {
-    const progress = Math.min((petCount / 100) * 100, 100);
+    const progress = Math.min((petCount / 50) * 100, 100);
     petProgressFill.style.width = `${progress}%`;
     // Make progress bar rainbow in infinite mode
-    if (petCount > 100) {
+    if (petCount >= 50) {
       petProgressFill.style.background = `linear-gradient(90deg, 
         #f43f5e, #ec4899, #8b5cf6, #3b82f6, #10b981, #f59e0b, #f43f5e)`;
       petProgressFill.style.backgroundSize = '200% 100%';
@@ -827,15 +841,15 @@ function handlePetBunny(): void {
     }
   }
   if (petProgressText) {
-    if (petCount < 20) {
-      petProgressText.textContent = `🎁 Something special at ${20 - petCount} more pets...`;
+    if (petCount < 15) {
+      petProgressText.textContent = `🎁 Something special at ${15 - petCount} more pets...`;
+    } else if (petCount < 30) {
+      petProgressText.textContent = `✨ Another surprise at ${30 - petCount} more pets...`;
     } else if (petCount < 50) {
-      petProgressText.textContent = `✨ Another surprise at ${50 - petCount} more pets...`;
-    } else if (petCount < 100) {
-      petProgressText.textContent = `🎉 Big surprise at ${100 - petCount} more pets...`;
+      petProgressText.textContent = `🎉 Big surprise at ${50 - petCount} more pets...`;
     } else {
       // Infinite love mode text
-      const extraLove = petCount - 100;
+      const extraLove = petCount - 50;
       petProgressText.textContent = `♾️ Infinite Love Mode! +${extraLove} extra love 💕`;
     }
   }
@@ -847,14 +861,14 @@ function handlePetBunny(): void {
   }
   
   // Extra effects in infinite mode every 25 pets
-  if (petCount > 100 && petCount % 25 === 0) {
+  if (petCount > 50 && petCount % 25 === 0) {
     confettiManager.burst();
     confettiManager.burst();
     heartsManager.burst(10);
   }
   
-  // Reveal the prescription at 20 pets!
-  if (petCount === 20) {
+  // Reveal the prescription at 15 pets!
+  if (petCount === 15) {
     const prescriptionContainer = document.getElementById('prescription-container');
     if (prescriptionContainer) {
       prescriptionContainer.classList.remove('hidden');
@@ -871,8 +885,8 @@ function handlePetBunny(): void {
     }
   }
   
-  // Reveal the photo gallery at 50 pets!
-  if (petCount === 50) {
+  // Reveal the photo gallery at 30 pets!
+  if (petCount === 30) {
     const gallerySection = document.getElementById('gallery-section');
     if (gallerySection) {
       gallerySection.classList.remove('hidden');
@@ -892,8 +906,8 @@ function handlePetBunny(): void {
     }
   }
   
-  // Reveal the Venmo surprise at 100 pets!
-  if (petCount === 100) {
+  // Reveal the Venmo surprise at 50 pets!
+  if (petCount === 50) {
     const surpriseContainer = document.getElementById('surprise-container');
     if (surpriseContainer) {
       surpriseContainer.classList.remove('hidden');
