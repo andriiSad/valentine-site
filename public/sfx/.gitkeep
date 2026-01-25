@@ -1,0 +1,7 @@
+# Placeholder for sound effects
+
+Add these sound files:
+- click.mp3 - Short click sound for button interactions
+- success.mp3 - Celebratory sound when "Yes" is clicked
+
+Keep them short (< 1 second for click, < 3 seconds for success)

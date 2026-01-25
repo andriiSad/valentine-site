@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐰</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Will you be my Valentine? A special message for someone special." />
+    <meta name="theme-color" content="#f43f5e" />
+    <title>Be My Valentine 💕🐰🩺</title>
+    <!-- Prevent FOUC - hide content until loaded, but show loading screen -->
+    <style>
+      #app { opacity: 0; transition: opacity 0.5s ease-out; }
+      html.loaded #app { opacity: 1; }
+      #loading-screen {
+        position: fixed; inset: 0; z-index: 9999;
+        background: linear-gradient(135deg, #fce7f3 0%, #fda4af 100%);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        transition: opacity 0.5s ease-out;
+      }
+      #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+      .loading-heart { font-size: 4rem; animation: loadPulse 1s ease-in-out infinite; }
+      .loading-text { font-family: 'Dancing Script', cursive; font-size: 2rem; color: #f43f5e; margin-top: 1rem; }
+      @keyframes loadPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    </style>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="min-h-screen overflow-x-hidden">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loading-heart">🐰💕</div>
+      <div class="loading-text">Loading love...</div>
+      <div id="loading-progress" style="margin-top: 1rem; width: 200px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 9999px; overflow: hidden;">
+        <div id="loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f43f5e, #ec4899); border-radius: 9999px; transition: width 0.3s;"></div>
+      </div>
+      <div id="loading-status" style="margin-top: 0.5rem; font-size: 0.875rem; color: #be185d;">Preparing surprises...</div>
+    </div>
+    <!-- Animated Gradient Background -->
+    <div class="fixed inset-0 bg-gradient-to-br from-pink-200 via-rose-100 to-red-200 animate-gradient-shift -z-10"></div>
+    
+    <!-- Sparkle overlay -->
+    <div id="sparkle-container" class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true"></div>
+    
+    <!-- Floating Hearts & Bunnies Background -->
+    <div id="hearts-container" class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true"></div>
+    
+    <!-- Floating Bunnies Container -->
+    <div id="bunnies-container" class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true"></div>
+    
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50" aria-hidden="true"></canvas>
+    
+    <!-- Music Toggle Button -->
+    <button 
+      id="music-toggle" 
+      class="fixed top-4 left-4 z-40 p-3 rounded-full bg-white/90 backdrop-blur-md shadow-xl hover:bg-white hover:scale-110 hover:rotate-12 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 group"
+      aria-label="Toggle background music"
+      title="Toggle background music"
+    >
+      <span id="music-icon" class="text-2xl group-hover:animate-bounce inline-block">🎵</span>
+    </button>
+
+    <!-- Sound Toggle Button -->
+    <button 
+      id="sound-toggle" 
+      class="fixed top-4 right-4 z-40 p-3 rounded-full bg-white/90 backdrop-blur-md shadow-xl hover:bg-white hover:scale-110 hover:rotate-12 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 group"
+      aria-label="Toggle sound effects"
+      title="Toggle sound effects"
+    >
+      <span id="sound-icon" class="text-2xl group-hover:animate-bounce inline-block">🔊</span>
+    </button>
+
+    <!-- Corner Decorations: Bunnies & Nurse themed -->
+    <div class="fixed bottom-4 left-4 text-6xl animate-wiggle z-20 pointer-events-none select-none hidden md:block" aria-hidden="true">🐰</div>
+    <div class="fixed bottom-4 right-4 text-6xl animate-wiggle-reverse z-20 pointer-events-none select-none hidden md:block" aria-hidden="true">🩺</div>
+    <div class="fixed top-20 left-4 text-4xl animate-float z-20 pointer-events-none select-none hidden lg:block" aria-hidden="true">🩷</div>
+    <div class="fixed top-20 right-20 text-4xl animate-float z-20 pointer-events-none select-none hidden lg:block" style="animation-delay: 1s" aria-hidden="true">💉</div>
+
+    <!-- Main App Container -->
+    <div id="app" class="relative z-10 min-h-screen">
+      
+      <!-- Hero Section -->
+      <section id="hero-section" class="py-8 px-4">
+        <div class="text-center max-w-3xl mx-auto">
+          
+          <!-- Cute bunny with heart -->
+          <div class="mb-6 relative inline-block">
+            <span class="text-7xl md:text-8xl animate-hop inline-block">🐰</span>
+            <span class="absolute -top-2 -right-2 text-3xl animate-pulse">💕</span>
+          </div>
+          
+          <!-- Main Heading with sparkle effect -->
+          <h1 class="font-cursive text-5xl md:text-7xl lg:text-8xl text-rose-600 mb-4 animate-title-glow drop-shadow-2xl">
+            Martha, will you be my Valentine?
+          </h1>
+          
+          <!-- Cute subtitle with typing effect -->
+          <p class="text-lg md:text-2xl text-rose-500 mb-8 opacity-90 font-medium">
+            <span class="animate-fade-in-up inline-block">I've been thinking about you...</span> 
+            <span class="inline-block animate-float text-2xl">💭</span>
+          </p>
+          
+          <!-- Bunny love row -->
+          <div class="flex justify-center gap-2 mb-8 text-3xl">
+            <span class="animate-hop" style="animation-delay: 0s">🐰</span>
+            <span class="animate-pulse" style="animation-delay: 0.1s">💖</span>
+            <span class="animate-hop" style="animation-delay: 0.2s">🩺</span>
+            <span class="animate-pulse" style="animation-delay: 0.3s">💕</span>
+            <span class="animate-hop" style="animation-delay: 0.4s">💉</span>
+            <span class="animate-pulse" style="animation-delay: 0.5s">🏥</span>
+            <span class="animate-hop" style="animation-delay: 0.6s">🐇</span>
+          </div>
+          
+          <!-- Glassy Card with Buttons -->
+          <div class="glass-card p-8 md:p-12 rounded-3xl max-w-lg mx-auto relative overflow-hidden">
+            <!-- Decorative hearts in corners -->
+            <div class="absolute top-3 left-3 text-2xl opacity-50">💗</div>
+            <div class="absolute top-3 right-3 text-2xl opacity-50">💗</div>
+            <div class="absolute bottom-3 left-3 text-2xl opacity-50">🐰</div>
+            <div class="absolute bottom-3 right-3 text-2xl opacity-50">🐰</div>
+            
+            <p class="text-rose-400 mb-6 text-lg font-medium">
+              Every bunny needs some bunny to love! 🐰💕
+              <br/><span class="text-base">Especially a soon-to-be nurse who heals hearts! 🩺💖</span>
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center relative" id="button-container">
+              <!-- Yes Button (grows with each No attempt!) -->
+              <button 
+                id="yes-btn"
+                class="btn-primary px-8 py-4 text-xl font-bold rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 text-white shadow-2xl hover:shadow-rose-500/50 hover:scale-110 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-rose-300 animate-shimmer relative overflow-hidden z-10"
+              >
+                <span class="relative z-10">Yes! 💘</span>
+              </button>
+              
+              <!-- No Button (runs away!) -->
+              <button 
+                id="no-btn"
+                class="btn-secondary px-6 py-3 text-lg font-bold rounded-full bg-white text-rose-400 border-2 border-rose-200 shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-rose-200 relative z-10"
+              >
+                <span id="no-btn-text">No 😅</span>
+              </button>
+            </div>
+            
+            <!-- Excuse message that appears when trying to click No -->
+            <div id="excuse-container" class="mt-6 p-4 bg-rose-50 rounded-xl opacity-0 transition-all duration-500 transform translate-y-4">
+              <p id="excuse-text" class="text-rose-500 font-medium text-lg">
+                <!-- Excuses will appear here -->
+              </p>
+            </div>
+          </div>
+          
+          <!-- Scroll indicator -->
+          <div class="mt-6 text-center animate-bounce">
+            <p class="text-rose-400 text-sm mb-2">👇 Can't wait to hear your answer! 👇</p>
+            <span class="text-3xl">⬇️</span>
+          </div>
+          
+          <!-- Interactive love meter -->
+          <div id="love-meter" class="mt-8 max-w-md mx-auto">
+            <p class="text-rose-500 mb-2 font-medium">Love Meter 💕</p>
+            <div class="h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
+              <div id="love-meter-fill" class="h-full bg-gradient-to-r from-pink-400 via-rose-500 to-red-500 rounded-full transition-all duration-1000 animate-pulse-slow" style="width: 50%"></div>
+            </div>
+            <p id="love-meter-text" class="text-sm text-rose-400 mt-2">Hmm... needs more love! 🐰</p>
+          </div>
+          
+        </div>
+      </section>
+
+      <!-- Photo Gallery Section -->
+      <section id="gallery-section" class="min-h-screen py-16 px-4 hidden">
+        <div class="max-w-6xl mx-auto">
+          
+          <!-- Redesigned "Our Memories" Header -->
+          <div class="text-center mb-12 relative">
+            <div class="inline-block relative">
+              <!-- Decorative elements -->
+              <span class="absolute -top-6 -left-8 text-4xl animate-float">🐰</span>
+              <span class="absolute -top-6 -right-8 text-4xl animate-float" style="animation-delay: 0.5s">🐇</span>
+              
+              <h2 class="font-cursive text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 drop-shadow-lg relative">
+                Us Soon
+              </h2>
+              
+              <!-- Decorative line with hearts -->
+              <div class="flex items-center justify-center gap-2 mt-4">
+                <div class="h-0.5 w-16 bg-gradient-to-r from-transparent to-rose-300"></div>
+                <span class="text-2xl animate-pulse">💖</span>
+                <span class="text-xl">🐰</span>
+                <span class="text-2xl animate-pulse" style="animation-delay: 0.2s">💕</span>
+                <div class="h-0.5 w-16 bg-gradient-to-l from-transparent to-rose-300"></div>
+              </div>
+            </div>
+            
+            <p class="text-rose-400 mt-4 text-lg">Coming soon to a future near us 💕✨</p>
+          </div>
+          
+          <!-- Gallery Container -->
+          <div class="glass-card p-6 md:p-10 rounded-3xl relative overflow-hidden">
+            <!-- Corner decorations -->
+            <div class="absolute top-4 left-4 text-3xl opacity-60">🐰</div>
+            <div class="absolute top-4 right-4 text-3xl opacity-60">💕</div>
+            <div class="absolute bottom-4 left-4 text-3xl opacity-60">💕</div>
+            <div class="absolute bottom-4 right-4 text-3xl opacity-60">🐇</div>
+            
+            <!-- Slideshow Container -->
+            <div id="gallery-container" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 shadow-inner">
+              <div id="gallery-slides" class="relative w-full h-full">
+                <div id="gallery-placeholder" class="absolute inset-0 flex items-center justify-center text-rose-300">
+                  <div class="text-center">
+                    <div class="text-6xl mb-4">
+                      <span class="inline-block animate-hop">🐰</span>
+                      <span class="inline-block">📷</span>
+                      <span class="inline-block animate-hop" style="animation-delay: 0.3s">🐇</span>
+                    </div>
+                    <p class="text-lg">Add photos to /public/photos</p>
+                    <p class="text-sm mt-2 opacity-70">Our memories will appear here! 💕</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Navigation Arrows with bunny theme -->
+              <button 
+                id="gallery-prev" 
+                class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-xl hover:bg-white hover:scale-125 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-400 hidden group"
+                aria-label="Previous photo"
+              >
+                <span class="text-2xl group-hover:-translate-x-1 transition-transform inline-block">🐰</span>
+              </button>
+              <button 
+                id="gallery-next" 
+                class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 backdrop-blur-sm shadow-xl hover:bg-white hover:scale-125 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-400 hidden group"
+                aria-label="Next photo"
+              >
+                <span class="text-2xl group-hover:translate-x-1 transition-transform inline-block">🐇</span>
+              </button>
+            </div>
+            
+            <!-- Dots Navigation -->
+            <div id="gallery-dots" class="flex justify-center gap-3 mt-6"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Success Message Section -->
+      <section id="success-section" class="min-h-screen flex flex-col items-center justify-center px-4 py-12 hidden">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="glass-card p-8 md:p-12 rounded-3xl relative overflow-hidden">
+            
+            <!-- Animated celebration -->
+            <div class="flex justify-center gap-2 text-6xl md:text-7xl mb-6">
+              <span class="animate-hop">🐰</span>
+              <span class="animate-pulse-slow text-8xl">💖</span>
+              <span class="animate-hop" style="animation-delay: 0.2s">🐇</span>
+            </div>
+            
+            <h2 class="font-cursive text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 mb-6 drop-shadow-lg animate-title-glow">
+              Yay Martha! You made Andrii so hoppy! 🩺💕
+            </h2>
+            
+            <p class="text-xl md:text-2xl text-rose-500 mb-6">
+              Even miles apart, Martha, my heart beats only for you! 💕🏥
+            </p>
+            <p class="text-lg text-rose-400 mb-4">
+              Distance means nothing when Martha means everything to Andrii! 💉✨
+            </p>
+            
+            <!-- Bunny love animation -->
+            <div class="flex justify-center items-center gap-4 text-4xl my-8">
+              <span class="animate-hop">🐰</span>
+              <span class="animate-pulse text-5xl">💕</span>
+              <span class="animate-hop" style="animation-delay: 0.15s">🩺</span>
+              <span class="animate-pulse text-5xl">💉</span>
+              <span class="animate-hop" style="animation-delay: 0.3s">🐇</span>
+            </div>
+            
+            <div class="text-lg text-rose-400 italic mb-8 p-4 bg-rose-50 rounded-xl">
+              "Winnie, Winferd & Miss Ma'am all agree: Andrii loves Martha very much!" 🐰💕🩺
+            </div>
+            
+            <div class="text-md text-rose-500 font-medium mb-6 p-4 bg-pink-50 rounded-xl">
+              🎓 Congratulations on becoming a nurse this year, Martha! 🩺💖
+              <br/>Andrii is so proud of you, my healthcare hero! 🏥✨
+            </div>
+            
+            <!-- Pet the Bunny - Interactive! -->
+            <div class="mt-8 max-w-md mx-auto">
+              <div id="pet-bunny" class="glass-card p-6 rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300 select-none" title="Click to pet Winnie!">
+                <p class="text-rose-400 text-sm mb-2">👆 Pet Winnie the bunny!</p>
+                <div id="bunny-emoji" class="text-6xl transition-transform duration-200">🐰</div>
+                <p id="pet-message" class="text-rose-500 text-sm mt-2 h-6"></p>
+                <p id="pet-counter" class="text-rose-300 text-xs">Pets: 0 🐾</p>
+                <div id="pet-progress-bar" class="mt-3 h-2 bg-white/50 rounded-full overflow-hidden">
+                  <div id="pet-progress-fill" class="h-full bg-gradient-to-r from-pink-400 to-rose-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="pet-progress-text" class="text-xs text-rose-300 mt-1">🎁 Keep petting for surprises...</p>
+              </div>
+            </div>
+            
+            <!-- Nurse's Prescription - Hidden until 20 pets -->
+            <div id="prescription-container" class="mt-8 max-w-md mx-auto hidden">
+              <div class="text-center mb-4">
+                <p class="text-rose-500 font-medium animate-pulse">🎉 Martha unlocked a special prescription! 🎉</p>
+              </div>
+              <div id="prescription" class="bg-white rounded-xl p-6 shadow-lg border-2 border-rose-200 relative transform rotate-1 hover:rotate-0 transition-transform duration-300">
+                <div class="absolute -top-3 -right-3 text-3xl">🩺</div>
+                <div class="text-left">
+                  <p class="text-rose-300 text-xs uppercase tracking-wider mb-1">💊 Love Prescription</p>
+                  <p class="font-cursive text-2xl text-rose-500 mb-2">For: Martha Bors</p>
+                  <div class="border-t border-rose-100 pt-3">
+                    <p class="text-rose-600 font-medium">Rx: Unlimited hugs & kisses from Andrii 💋</p>
+                    <p class="text-rose-400 text-sm mt-1">Dosage: As needed (which is always!)</p>
+                    <p class="text-rose-400 text-sm">Refills: ∞ (infinite)</p>
+                    <p class="text-rose-400 text-sm">Side effects: Extreme happiness 💕</p>
+                  </div>
+                  <div class="mt-4 text-right">
+                    <p class="font-cursive text-lg text-rose-500">Dr. Winnie 🐰💕</p>
+                    <p class="text-rose-300 text-xs">Winferd MD, Miss Ma'am RN</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Hidden surprise photo container - unlocked at 50 pets -->
+            <div id="surprise-container" class="hidden mt-8 p-6 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl shadow-xl">
+              <h3 class="font-cursive text-3xl text-emerald-600 mb-4">💸 Ka-Ching! 💸</h3>
+              <div class="text-6xl mb-4">💰🐰💵</div>
+              <p class="text-emerald-600 text-2xl font-bold mb-2">+$100.00</p>
+              <p class="text-emerald-600 text-xl mb-4">Andrii just Venmo'd you $100 because he loves you! 💚</p>
+              <p class="text-emerald-500 italic">"Check your phone, cutie! 100 bucks from your future hubby 💕" - Andrii 🐰</p>
+              <p class="text-emerald-400 mt-4 text-sm">You earned it by petting Winnie 100 times! 🐾</p>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
