@@ -153,14 +153,14 @@ class ConfettiManager {
   /**
    * Trigger a confetti burst - reduced particle count
    */
-  burst(x?: number, y?: number, count: number = 40): void {
+  burst(x?: number, y?: number, count: number = 20): void {
     // Check for reduced motion preference
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
     
     // Limit total particles on screen
-    if (this.particles.length > 100) {
+    if (this.particles.length > 50) {
       return;
     }
     
@@ -191,7 +191,7 @@ class ConfettiManager {
     
     positions.forEach((pos, index) => {
       setTimeout(() => {
-        this.burst(pos.x, pos.y, 30);
+        this.burst(pos.x, pos.y, 15);
       }, index * 300);
     });
   }

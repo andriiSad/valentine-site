@@ -7,7 +7,7 @@ class HeartsManager {
   private container: HTMLElement | null = null;
   private hearts: HTMLElement[] = [];
   private intervalId: number | null = null;
-  private maxHearts = 4; // Very few hearts
+  private maxHearts = 2; // Minimal hearts for performance
   private reducedMotion = false;
 
   private heartEmojis = ['💕', '💖', '❤️'];
@@ -97,15 +97,13 @@ class HeartsManager {
   start(): void {
     if (this.reducedMotion || this.intervalId) return;
     
-    // Create initial batch (very few hearts)
-    for (let i = 0; i < 2; i++) {
-      setTimeout(() => this.addHeart(), i * 2000);
-    }
+    // Create initial heart (just 1)
+    setTimeout(() => this.addHeart(), 2000);
     
-    // Continue creating hearts (much slower)
+    // Continue creating hearts (very slow - every 10 seconds)
     this.intervalId = window.setInterval(() => {
       this.addHeart();
-    }, 6000);
+    }, 10000);
   }
 
   /**
@@ -129,7 +127,7 @@ class HeartsManager {
   /**
    * Burst of hearts (for celebration)
    */
-  burst(count: number = 10): void {
+  burst(count: number = 5): void {
     if (this.reducedMotion) return;
     
     for (let i = 0; i < count; i++) {

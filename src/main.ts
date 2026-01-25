@@ -420,7 +420,7 @@ function toggleBackgroundMusic(): void {
 function startFloatingBunnies(): void {
   if (!bunniesContainer) return;
   
-  const floatingEmojis = ['🐰', '�'];
+  const floatingEmojis = ['🐰', '🐇'];
   let bunnyCount = 0;
   const maxBunnies = 2; // Very few bunnies
   
@@ -512,17 +512,93 @@ function handleFirstInteraction(): void {
 // ============================================
 function handleYesClick(): void {
   soundManager.playYeey();
-  updateLoveMeter(100);
-  hideSection(heroSection);
   
+  // First scroll to love meter so user can see the animation (important for mobile)
+  const loveMeterContainer = document.getElementById('love-meter');
+  if (loveMeterContainer) {
+    loveMeterContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  
+  // Wait a bit for scroll to complete, then animate
   setTimeout(() => {
-    // Gallery is now only shown after 50 pets!
-    showSection(successSection);
-    confettiManager.celebrate();
-    heartsManager.burst(20);
-    setTimeout(() => confettiManager.burst(), 500);
-    setTimeout(() => confettiManager.burst(), 1000);
-  }, 500);
+    // Animate love meter to 100% first
+    animateLoveMeterToMax().then(() => {
+      // Then overflow with special animation
+      return animateLoveMeterOverflow();
+    }).then(() => {
+      // Finally switch screens
+      hideSection(heroSection);
+      
+      setTimeout(() => {
+        showSection(successSection);
+        confettiManager.celebrate();
+        heartsManager.burst(8);
+        setTimeout(() => confettiManager.burst(), 800);
+      }, 300);
+    });
+  }, 400);
+}
+
+// Animate love meter smoothly to 100%
+function animateLoveMeterToMax(): Promise<void> {
+  return new Promise((resolve) => {
+    const startValue = loveMeterValue;
+    const duration = 800; // ms
+    const startTime = performance.now();
+    
+    function animate(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentValue = startValue + (100 - startValue) * eased;
+      
+      loveMeterValue = currentValue;
+      loveMeter.style.width = `${currentValue}%`;
+      
+      // Update text at thresholds
+      for (let i = loveMeterTexts.length - 1; i >= 0; i--) {
+        if (currentValue >= loveMeterTexts[i].threshold) {
+          loveMeterText.textContent = loveMeterTexts[i].text;
+          break;
+        }
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve();
+      }
+    }
+    
+    requestAnimationFrame(animate);
+  });
+}
+
+// Animate love meter overflowing beyond 100%
+function animateLoveMeterOverflow(): Promise<void> {
+  return new Promise((resolve) => {
+    const loveMeterContainer = document.getElementById('love-meter');
+    
+    // Add overflow animation class
+    loveMeter.classList.add('love-overflow');
+    if (loveMeterContainer) {
+      loveMeterContainer.classList.add('love-overflow-container');
+    }
+    
+    // Update text to show overflow
+    loveMeterText.textContent = "💖 LOVE OVERLOAD!!! 💖";
+    
+    // Burst confetti during overflow
+    confettiManager.burst();
+    heartsManager.burst(5);
+    
+    // Wait for animation to complete
+    setTimeout(() => {
+      resolve();
+    }, 1200);
+  });
 }
 
 // ============================================
@@ -635,8 +711,8 @@ function growYesButton(): void {
     loveMeterContainer.style.transition = 'transform 0.3s ease-out';
   }
   
-  // Increase love meter with each No attempt
-  increaseLoveMeter(3);
+  // Decrease love meter with each No attempt (minimum 5%)
+  decreaseLoveMeter(8);
 }
 
 function createSadBunny(): void {
@@ -670,6 +746,16 @@ function updateLoveMeter(value: number): void {
 
 function increaseLoveMeter(amount: number): void {
   updateLoveMeter(loveMeterValue + amount);
+}
+
+function decreaseLoveMeter(amount: number): void {
+  // Minimum of 5% so it never fully empties
+  const newValue = Math.max(5, loveMeterValue - amount);
+  updateLoveMeter(newValue);
+  
+  // Add shake animation when decreasing
+  loveMeter.classList.add('love-decrease');
+  setTimeout(() => loveMeter.classList.remove('love-decrease'), 300);
 }
 
 // ============================================
@@ -709,8 +795,8 @@ function handleHeartClick(e: MouseEvent): void {
   
   // Confetti every 10 clicks
   if (heartsSent % 10 === 0) {
-    confettiManager.burst(e.clientX, e.clientY, 30);
-    heartsManager.burst(5);
+    confettiManager.burst(e.clientX, e.clientY, 15);
+    heartsManager.burst(3);
   }
   
   // SURPRISE at 100 clicks!
@@ -725,7 +811,7 @@ function revealSurprise(): void {
   
   // Big celebration!
   confettiManager.celebrate();
-  heartsManager.burst(20);
+  heartsManager.burst(8);
   
   // Show surprise container
   if (surpriseContainer) {
@@ -740,8 +826,7 @@ function revealSurprise(): void {
   }
   
   // More confetti bursts
-  setTimeout(() => confettiManager.burst(), 1000);
-  setTimeout(() => confettiManager.burst(), 2000);
+  setTimeout(() => confettiManager.burst(), 1500);
 }
 
 function createClickHeart(x: number, y: number): void {
@@ -927,14 +1012,13 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
   // Special effects at milestones
   if (petCount % 10 === 0) {
     confettiManager.burst();
-    heartsManager.burst(5);
+    heartsManager.burst(3);
   }
   
   // Extra effects in infinite mode every 25 points
   if (petCount > 75 && petCount % 25 === 0) {
     confettiManager.burst();
-    confettiManager.burst();
-    heartsManager.burst(10);
+    heartsManager.burst(5);
   }
   
   // Reveal the prescription at 30+ points!
@@ -967,8 +1051,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       gallery?.init(); // Initialize the gallery slideshow
       soundManager.playClap();
       confettiManager.burst();
-      confettiManager.burst(); // Extra confetti!
-      heartsManager.burst(10);
+      heartsManager.burst(5);
       if (petMessage) {
         petMessage.textContent = "🎉 WOW! You unlocked the photo gallery! 📸💕";
         petMessage.style.opacity = '1';
@@ -989,9 +1072,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       collageContainer.style.animation = 'bounceIn 0.6s ease-out';
       soundManager.playClap();
       confettiManager.burst();
-      confettiManager.burst();
-      confettiManager.burst(); // Triple confetti!
-      heartsManager.burst(15);
+      heartsManager.burst(8);
       if (petMessage) {
         petMessage.textContent = "📸 You unlocked our photo collage! 💕";
         petMessage.style.opacity = '1';
@@ -1012,10 +1093,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       surpriseContainer.style.animation = 'bounceIn 0.6s ease-out';
       soundManager.playClap();
       confettiManager.burst();
-      confettiManager.burst();
-      confettiManager.burst();
-      confettiManager.burst(); // Quadruple confetti!
-      heartsManager.burst(20);
+      heartsManager.burst(8);
       if (petMessage) {
         petMessage.textContent = "🎁 You deserve something special! Check below! 💕";
         petMessage.style.opacity = '1';
@@ -1035,9 +1113,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       certificateContainer.classList.remove('hidden');
       certificateContainer.style.animation = 'bounceIn 0.6s ease-out';
       soundManager.playClap();
-      confettiManager.celebrate(); // Big celebration!
-      confettiManager.burst();
-      confettiManager.burst();
+      confettiManager.celebrate();
       if (petMessage) {
         petMessage.textContent = "👑 WOW! You're officially the BEST bunny lover! 🏆💕";
         petMessage.style.opacity = '1';
