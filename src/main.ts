@@ -979,7 +979,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       confettiManager.burst(); // Triple confetti!
       heartsManager.burst(15);
       if (petMessage) {
-        petMessage.textContent = "💸 Cha-ching! Check your Venmo! 💕";
+        petMessage.textContent = "� You deserve something special! Check below! 💕";
         petMessage.style.opacity = '1';
       }
       // Scroll to Venmo surprise
