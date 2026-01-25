@@ -248,13 +248,17 @@ function preloadImage(src: string): Promise<string> {
 }
 
 // Discover and preload all gallery images - optimized for speed
+// Excludes collage image (2.jpg) which is shown separately in Museum of Us
 async function discoverGalleryImages(): Promise<string[]> {
   const basePath = './photos';
   // Most common patterns only - numbered jpgs first (fastest)
+  // Skip 2.jpg/2.png as that's reserved for the Museum of Us collage
   const patterns = [
-    // Numbered (1.jpg, 2.jpg, etc.) - most common
-    ...Array.from({ length: 12 }, (_, i) => `${basePath}/${i + 1}.jpg`),
-    ...Array.from({ length: 12 }, (_, i) => `${basePath}/${i + 1}.png`),
+    // Numbered (1.jpg, 3.jpg, etc.) - skip 2 which is the collage
+    `${basePath}/1.jpg`,
+    ...Array.from({ length: 10 }, (_, i) => `${basePath}/${i + 3}.jpg`),
+    `${basePath}/1.png`,
+    ...Array.from({ length: 10 }, (_, i) => `${basePath}/${i + 3}.png`),
     // Common names
     `${basePath}/image.jpg`, `${basePath}/image.png`,
     `${basePath}/photo.jpg`, `${basePath}/photo.png`,
