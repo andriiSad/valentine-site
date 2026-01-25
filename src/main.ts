@@ -601,7 +601,7 @@ function showExcuse(): void {
   setTimeout(() => {
     excuseContainer.style.opacity = '0';
     excuseContainer.style.transform = 'translateY(4px)';
-  }, 6000);
+  }, 8000);
 }
 
 function updateNoButtonText(): void {
@@ -899,6 +899,8 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       petProgressText.textContent = `🎁 Something special at ${30 - petCount} more points...`;
     } else if (petCount < 50) {
       petProgressText.textContent = `✨ Another surprise at ${50 - petCount} more points...`;
+    } else if (petCount < 75) {
+      petProgressText.textContent = `� A special reward at ${75 - petCount} more points...`;
     } else if (petCount < 100) {
       petProgressText.textContent = `🎉 Big surprise at ${100 - petCount} more points...`;
     } else {
@@ -987,8 +989,8 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
     }
   }
   
-  // Reveal the Ultimate Love Certificate at 100+ points!
-  if (petCount >= 100 && !certificateUnlocked) {
+  // Reveal the Ultimate Love Certificate at 75+ points!
+  if (petCount >= 75 && !certificateUnlocked) {
     certificateUnlocked = true;
     const certificateContainer = document.getElementById('love-certificate-container');
     if (certificateContainer) {
