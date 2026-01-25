@@ -549,8 +549,8 @@ function handleNoClick(): void {
   noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${shrink}) rotate(${rotation}deg)`;
   noBtn.style.opacity = String(fade);
   
-  // After 15 clicks, make button "defeated" but still visible
-  if (noAttempts >= 15) {
+  // After 10 clicks, make button "defeated" but still visible
+  if (noAttempts >= 10) {
     defeatNoButton();
   }
 }
