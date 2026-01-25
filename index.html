@@ -289,19 +289,33 @@
             
             <!-- Pet the Bunny - Interactive! -->
             <div class="mt-8 max-w-md mx-auto">
-              <div id="pet-bunny" class="glass-card p-6 rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300 select-none" title="Click to pet Winnie!">
-                <p class="text-rose-400 text-sm mb-2">👆 Pet Winnie the bunny!</p>
-                <div id="bunny-emoji" class="text-6xl transition-transform duration-200">🐰</div>
+              <div class="glass-card p-6 rounded-2xl select-none">
+                <p class="text-rose-400 text-sm mb-2">💕 Interact with Winnie!</p>
+                <div id="bunny-emoji" class="text-6xl transition-transform duration-200 mb-4">🐰</div>
                 <p id="pet-message" class="text-rose-500 text-sm mt-2 h-6"></p>
-                <p id="pet-counter" class="text-rose-300 text-xs">Pets: 0 🐾</p>
+                
+                <!-- Interaction Buttons -->
+                <div class="flex flex-wrap justify-center gap-2 mt-4">
+                  <button id="pet-bunny" class="px-4 py-2 bg-pink-100 hover:bg-pink-200 text-rose-600 rounded-full text-sm font-medium transition-all hover:scale-105 active:scale-95" title="Pet Winnie (+1)">
+                    🐾 Pet (+1)
+                  </button>
+                  <button id="give-blueberry" class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full text-sm font-medium transition-all hover:scale-105 active:scale-95" title="Give Blueberry (+2)">
+                    🫐 Blueberry (+2)
+                  </button>
+                  <button id="give-nose-boop" class="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-600 rounded-full text-sm font-medium transition-all hover:scale-105 active:scale-95" title="Nose Boop (+3)">
+                    👃 Nose Boop (+3)
+                  </button>
+                </div>
+                
+                <p id="pet-counter" class="text-rose-300 text-xs mt-4">Points: 0 🐾</p>
                 <div id="pet-progress-bar" class="mt-3 h-2 bg-white/50 rounded-full overflow-hidden">
                   <div id="pet-progress-fill" class="h-full bg-gradient-to-r from-pink-400 to-rose-500 rounded-full transition-all duration-300" style="width: 0%"></div>
                 </div>
-                <p id="pet-progress-text" class="text-xs text-rose-300 mt-1">🎁 Keep petting for surprises...</p>
+                <p id="pet-progress-text" class="text-xs text-rose-300 mt-1">🎁 Keep interacting for surprises...</p>
               </div>
             </div>
             
-            <!-- Nurse's Prescription - Hidden until 20 pets -->
+            <!-- Nurse's Prescription - Hidden until 15 points -->
             <div id="prescription-container" class="mt-8 max-w-md mx-auto hidden">
               <div class="text-center mb-4">
                 <p class="text-rose-500 font-medium animate-pulse">🎉 Martha unlocked a special prescription! 🎉</p>

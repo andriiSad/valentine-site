@@ -150,6 +150,8 @@ const surpriseHint = document.getElementById('surprise-hint');
 
 // New interactive elements
 const petBunny = document.getElementById('pet-bunny');
+const giveBlueberry = document.getElementById('give-blueberry');
+const giveNoseBoop = document.getElementById('give-nose-boop');
 const bunnyEmoji = document.getElementById('bunny-emoji');
 const petMessage = document.getElementById('pet-message');
 const petCounterEl = document.getElementById('pet-counter');
@@ -171,6 +173,12 @@ let musicPlaying = false;
 let surpriseRevealed = false;
 let petCount = 0;
 let hugCount = 0;
+
+// Milestone unlocks (to prevent multiple triggers)
+let prescriptionUnlocked = false;
+let galleryUnlocked = false;
+let venmoUnlocked = false;
+let certificateUnlocked = false;
 
 // ============================================
 // Loading Screen Handler
@@ -468,8 +476,10 @@ function setupEventListeners(): void {
   if (musicToggle) musicToggle.addEventListener('click', () => { soundManager.init(); toggleBackgroundMusic(); });
   if (clickHeartsArea) clickHeartsArea.addEventListener('click', (e) => handleHeartClick(e as MouseEvent));
   
-  // Pet the bunny interaction
-  if (petBunny) petBunny.addEventListener('click', handlePetBunny);
+  // Bunny interaction buttons
+  if (petBunny) petBunny.addEventListener('click', () => handleBunnyInteraction('pet', 1));
+  if (giveBlueberry) giveBlueberry.addEventListener('click', () => handleBunnyInteraction('blueberry', 2));
+  if (giveNoseBoop) giveNoseBoop.addEventListener('click', () => handleBunnyInteraction('noseboop', 3));
   
   // Send hug interaction
   if (sendHugBtn) sendHugBtn.addEventListener('click', handleSendHug);
@@ -489,14 +499,13 @@ function handleFirstInteraction(): void {
 // Yes Button Handler
 // ============================================
 function handleYesClick(): void {
-  soundManager.playClick();
+  soundManager.playYeey();
   updateLoveMeter(100);
   hideSection(heroSection);
   
   setTimeout(() => {
     // Gallery is now only shown after 50 pets!
     showSection(successSection);
-    soundManager.playSuccess();
     confettiManager.celebrate();
     heartsManager.burst(20);
     setTimeout(() => confettiManager.burst(), 500);
@@ -513,7 +522,10 @@ let noButtonVisible = true;
 function handleNoClick(): void {
   if (!noButtonVisible) return;
   
-  soundManager.playClick();
+  // Ensure sounds are initialized on first interaction
+  soundManager.init();
+  
+  soundManager.playError();
   showExcuse();
   noAttempts++;
   
@@ -537,15 +549,15 @@ function handleNoClick(): void {
   noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${shrink}) rotate(${rotation}deg)`;
   noBtn.style.opacity = String(fade);
   
-  // After 10 clicks, make button "defeated" but still visible
-  if (noAttempts >= 10) {
+  // After 15 clicks, make button "defeated" but still visible
+  if (noAttempts >= 15) {
     defeatNoButton();
   }
 }
 
 // Make the No button "defeated" - still visible but wiggles around
 function defeatNoButton(): void {
-  soundManager.playClick();
+  soundManager.playError();
   
   // Show victory message
   excuseContainer.style.opacity = '1';
@@ -653,7 +665,7 @@ function increaseLoveMeter(amount: number): void {
 // ============================================
 function handleHeartClick(e: MouseEvent): void {
   heartsSent++;
-  soundManager.playClick();
+  soundManager.playBoop();
   
   // Update counter
   if (heartCounter) heartCounter.textContent = `Hearts sent: ${heartsSent} 💕`;
@@ -697,7 +709,7 @@ function handleHeartClick(e: MouseEvent): void {
 
 function revealSurprise(): void {
   surpriseRevealed = true;
-  soundManager.playSuccess();
+  soundManager.playYeey();
   
   // Big celebration!
   confettiManager.celebrate();
@@ -737,7 +749,7 @@ function createClickHeart(x: number, y: number): void {
 function handleSoundToggle(): void {
   soundManager.toggle();
   updateSoundIcon();
-  if (soundManager.isEnabled()) { soundManager.init(); soundManager.playClick(); }
+  if (soundManager.isEnabled()) { soundManager.init(); soundManager.playBoop(); }
 }
 
 function updateSoundIcon(): void {
@@ -746,23 +758,38 @@ function updateSoundIcon(): void {
 }
 
 // ============================================
-// Pet the Bunny Handler
+// Bunny Interaction Handler
 // ============================================
 const petMessages = [
   "*Winnie makes happy noises* 🐰💕",
-  "Winferd loves Martha! 🥰",
+  "Winferd loves you! 🥰",
   "*Miss Ma'am wiggles nose* ✨",
   "Winnie is so soft and fluffy! 🐇",
   "*Winferd hops happily* 💖",
-  "Best pets ever, Martha! 🌟",
+  "Best pets ever! 🌟",
   "*Miss Ma'am purrs* 😊",
-  "Winnie wants more pets! 🐰",
+  "Winnie wants more! 🐰",
   "*Winferd's ears go up* 💕",
-  "Nurse Martha approved! 🩺",
-  "*Miss Ma'am does a binky* 🎉",
-  "Martha, you're the best! 💗",
-  "Winnie loves Andrii too! 🐰💕",
-  "*Winferd is grateful* ✨",
+];
+
+const blueberryMessages = [
+  "*Winnie chomps happily* 🫐😋",
+  "Winferd: 'My favorite!' 🫐💕",
+  "*Miss Ma'am savors it* 🫐✨",
+  "Winnie loves blueberries! 🫐🐰",
+  "*nom nom nom* 🫐😍",
+  "Winferd: 'More please!' 🫐🥺",
+  "*Miss Ma'am does a happy binky* 🫐🎉",
+];
+
+const noseBoopMessages = [
+  "*boop* Winnie's nose wiggles! 👃🐰",
+  "*wiggle wiggle* So soft! 👃✨",
+  "Winnie loves nose boops! 👃💕",
+  "*the softest boop* 👃😊",
+  "*sniff sniff* Boop accepted! 👃🐾",
+  "Winnie's nose twitches happily! 👃💖",
+  "*maximum nose wiggle achieved* 👃🎉",
 ];
 
 // Infinite love messages after all surprises unlocked
@@ -770,54 +797,86 @@ const infiniteLoveMessages = [
   "No amount of clicks can express how much Andrii loves you 💕",
   "But he'll always love you more... 💖",
   "Every click = another 'I love you' from Andrii 🐰",
-  "Martha, you're Andrii's whole world 🌍💕",
-  "Infinity wouldn't be enough pets! ♾️🐰",
-  "Andrii's love for Martha: ∞ + 1 💗",
-  "Keep clicking, Andrii's love keeps growing! 📈💕",
-  "You could pet Winnie forever and still... 🐰💖",
-  "Andrii loves Martha more than all the bunnies! 🐰🐇🐰",
+  "You're Andrii's whole world 🌍💕",
+  "Infinity wouldn't be enough! ♾️🐰",
+  "Andrii's love: ∞ + 1 💗",
+  "Keep clicking, the love keeps growing! 📈💕",
   "This is the infinite love zone! ♾️💕",
   "Martha + Andrii = Forever 💍💕",
-  "No clicks will ever be enough... but keep trying! 🐰",
-  "Andrii: Still loving Martha more! 💖",
-  "The love counter broke... too much love! 💕🔥",
   "Error 404: Limit of love not found ♾️",
 ];
 
-function handlePetBunny(): void {
-  petCount++;
-  soundManager.playClick();
-  increaseLoveMeter(2);
+function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: number): void {
+  petCount += points;
+  increaseLoveMeter(points);
   
-  // Animate bunny
-  if (bunnyEmoji) {
-    bunnyEmoji.style.transform = 'scale(1.3) rotate(10deg)';
-    setTimeout(() => {
-      bunnyEmoji.style.transform = 'scale(1.1) rotate(-5deg)';
-      setTimeout(() => {
-        bunnyEmoji.style.transform = 'scale(1)';
-      }, 150);
-    }, 150);
+  // Different sounds for different interactions
+  if (type === 'pet') {
+    soundManager.playClick();
+  } else if (type === 'blueberry') {
+    soundManager.playYeey(); // Special treat sound!
+  } else if (type === 'noseboop') {
+    // Funny cartoon boop sound!
+    soundManager.playBoop();
   }
   
-  // Show random message - use infinite love messages after 100 pets
-  if (petMessage) {
-    if (petCount > 100) {
-      // Infinite love mode!
-      petMessage.textContent = infiniteLoveMessages[Math.floor(Math.random() * infiniteLoveMessages.length)];
-    } else {
-      petMessage.textContent = petMessages[Math.floor(Math.random() * petMessages.length)];
+  // Different emojis for different interactions
+  if (bunnyEmoji) {
+    let emoji = '🐰';
+    if (type === 'pet') {
+      emoji = '🐰'; // Happy bunny
+    } else if (type === 'blueberry') {
+      emoji = '😋🫐'; // Eating bunny
+    } else if (type === 'noseboop') {
+      emoji = '👃🐰'; // Nose boop bunny
     }
+    
+    // Show the new emoji with animation
+    bunnyEmoji.textContent = emoji;
+    
+    if (type === 'pet') {
+      bunnyEmoji.style.transform = 'scale(1.3) rotate(10deg)';
+    } else if (type === 'blueberry') {
+      bunnyEmoji.style.transform = 'scale(1.2) translateY(-10px)';
+    } else if (type === 'noseboop') {
+      bunnyEmoji.style.transform = 'scale(1.3) translateX(5px)';
+    }
+    
+    setTimeout(() => {
+      bunnyEmoji.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        bunnyEmoji.style.transform = 'scale(1)';
+        // Reset emoji back to default after animation
+        setTimeout(() => {
+          bunnyEmoji.textContent = '🐰';
+        }, 500);
+      }, 150);
+    }, 200);
+  }
+  
+  // Show random message based on interaction type
+  if (petMessage) {
+    let messages: string[];
+    if (petCount > 100) {
+      messages = infiniteLoveMessages;
+    } else if (type === 'pet') {
+      messages = petMessages;
+    } else if (type === 'blueberry') {
+      messages = blueberryMessages;
+    } else {
+      messages = noseBoopMessages;
+    }
+    petMessage.textContent = messages[Math.floor(Math.random() * messages.length)];
     petMessage.style.opacity = '1';
     setTimeout(() => { petMessage.style.opacity = '0.7'; }, 1500);
   }
   
-  // Update counter - special display after 50
+  // Update counter - special display after 100
   if (petCounterEl) {
-    if (petCount >= 50) {
-      petCounterEl.textContent = `Infinite Love Mode: ${petCount} 🐾💕`;
+    if (petCount >= 100) {
+      petCounterEl.textContent = `Infinite Love Mode: ${petCount} points 🐾💕`;
     } else {
-      petCounterEl.textContent = `Pets: ${petCount} 🐾`;
+      petCounterEl.textContent = `Points: ${petCount} 🐾`;
     }
   }
   
@@ -825,10 +884,10 @@ function handlePetBunny(): void {
   const petProgressFill = document.getElementById('pet-progress-fill');
   const petProgressText = document.getElementById('pet-progress-text');
   if (petProgressFill) {
-    const progress = Math.min((petCount / 50) * 100, 100);
+    const progress = Math.min((petCount / 100) * 100, 100);
     petProgressFill.style.width = `${progress}%`;
     // Make progress bar rainbow in infinite mode
-    if (petCount >= 50) {
+    if (petCount >= 100) {
       petProgressFill.style.background = `linear-gradient(90deg, 
         #f43f5e, #ec4899, #8b5cf6, #3b82f6, #10b981, #f59e0b, #f43f5e)`;
       petProgressFill.style.backgroundSize = '200% 100%';
@@ -836,14 +895,12 @@ function handlePetBunny(): void {
     }
   }
   if (petProgressText) {
-    if (petCount < 15) {
-      petProgressText.textContent = `🎁 Something special at ${15 - petCount} more pets...`;
-    } else if (petCount < 30) {
-      petProgressText.textContent = `✨ Another surprise at ${30 - petCount} more pets...`;
+    if (petCount < 30) {
+      petProgressText.textContent = `🎁 Something special at ${30 - petCount} more points...`;
     } else if (petCount < 50) {
-      petProgressText.textContent = `🎉 Big surprise at ${50 - petCount} more pets...`;
+      petProgressText.textContent = `✨ Another surprise at ${50 - petCount} more points...`;
     } else if (petCount < 100) {
-      petProgressText.textContent = `♾️ Infinite Mode! 👑 Ultimate reward at ${100 - petCount} more pets...`;
+      petProgressText.textContent = `🎉 Big surprise at ${100 - petCount} more points...`;
     } else {
       // After 100 - true infinite love mode
       const extraLove = petCount - 100;
@@ -857,19 +914,21 @@ function handlePetBunny(): void {
     heartsManager.burst(5);
   }
   
-  // Extra effects in infinite mode every 25 pets
+  // Extra effects in infinite mode every 25 points
   if (petCount > 50 && petCount % 25 === 0) {
     confettiManager.burst();
     confettiManager.burst();
     heartsManager.burst(10);
   }
   
-  // Reveal the prescription at 15 pets!
-  if (petCount === 15) {
+  // Reveal the prescription at 30+ points!
+  if (petCount >= 30 && !prescriptionUnlocked) {
+    prescriptionUnlocked = true;
     const prescriptionContainer = document.getElementById('prescription-container');
     if (prescriptionContainer) {
       prescriptionContainer.classList.remove('hidden');
       prescriptionContainer.style.animation = 'bounceIn 0.6s ease-out';
+      soundManager.playClap();
       confettiManager.burst();
       if (petMessage) {
         petMessage.textContent = "✨ You unlocked a special prescription! 🩺💕";
@@ -882,13 +941,15 @@ function handlePetBunny(): void {
     }
   }
   
-  // Reveal the photo gallery at 30 pets!
-  if (petCount === 30) {
+  // Reveal the photo gallery at 50+ points!
+  if (petCount >= 50 && !galleryUnlocked) {
+    galleryUnlocked = true;
     const gallerySection = document.getElementById('gallery-section');
     if (gallerySection) {
       gallerySection.classList.remove('hidden');
       gallerySection.style.animation = 'bounceIn 0.6s ease-out';
       gallery?.init(); // Initialize the gallery slideshow
+      soundManager.playClap();
       confettiManager.burst();
       confettiManager.burst(); // Extra confetti!
       heartsManager.burst(10);
@@ -903,12 +964,14 @@ function handlePetBunny(): void {
     }
   }
   
-  // Reveal the Venmo surprise at 50 pets!
-  if (petCount === 50) {
+  // Reveal the Venmo surprise at 100+ points!
+  if (petCount >= 100 && !venmoUnlocked) {
+    venmoUnlocked = true;
     const surpriseContainer = document.getElementById('surprise-container');
     if (surpriseContainer) {
       surpriseContainer.classList.remove('hidden');
       surpriseContainer.style.animation = 'bounceIn 0.6s ease-out';
+      soundManager.playClap();
       confettiManager.burst();
       confettiManager.burst();
       confettiManager.burst(); // Triple confetti!
@@ -924,17 +987,19 @@ function handlePetBunny(): void {
     }
   }
   
-  // Reveal the Ultimate Love Certificate at 100 pets!
-  if (petCount === 100) {
+  // Reveal the Ultimate Love Certificate at 100+ points!
+  if (petCount >= 100 && !certificateUnlocked) {
+    certificateUnlocked = true;
     const certificateContainer = document.getElementById('love-certificate-container');
     if (certificateContainer) {
       certificateContainer.classList.remove('hidden');
       certificateContainer.style.animation = 'bounceIn 0.6s ease-out';
+      soundManager.playClap();
       confettiManager.celebrate(); // Big celebration!
       confettiManager.burst();
       confettiManager.burst();
       if (petMessage) {
-        petMessage.textContent = "👑 WOW! You're officially the BEST bunny petter! 🏆💕";
+        petMessage.textContent = "👑 WOW! You're officially the BEST bunny lover! 🏆💕";
         petMessage.style.opacity = '1';
       }
       // Scroll to certificate
@@ -961,7 +1026,7 @@ const hugMessages = [
 
 function handleSendHug(): void {
   hugCount++;
-  soundManager.playClick();
+  soundManager.playBoop();
   increaseLoveMeter(5);
   
   // Animate button

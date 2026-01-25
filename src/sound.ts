@@ -6,8 +6,11 @@
 const SOUND_ENABLED_KEY = 'valentine-sound-enabled';
 
 class SoundManager {
+  private boopSound: HTMLAudioElement | null = null;
+  private noSound: HTMLAudioElement | null = null;
+  private yeeySound: HTMLAudioElement | null = null;
   private clickSound: HTMLAudioElement | null = null;
-  private successSound: HTMLAudioElement | null = null;
+  private clapSound: HTMLAudioElement | null = null;
   private enabled: boolean = true;
   private initialized: boolean = false;
 
@@ -24,13 +27,25 @@ class SoundManager {
     if (this.initialized) return;
     
     try {
-      this.clickSound = new Audio('./sfx/click.mp3');
+      this.boopSound = new Audio('./sfx/boop.ogg');
+      this.boopSound.preload = 'auto';
+      this.boopSound.volume = 0.6;
+      
+      this.noSound = new Audio('./sfx/no.ogg');
+      this.noSound.preload = 'auto';
+      this.noSound.volume = 0.5;
+      
+      this.yeeySound = new Audio('./sfx/yeey.ogg');
+      this.yeeySound.preload = 'auto';
+      this.yeeySound.volume = 0.7;
+      
+      this.clickSound = new Audio('./sfx/click.ogg');
       this.clickSound.preload = 'auto';
       this.clickSound.volume = 0.5;
       
-      this.successSound = new Audio('./sfx/success.mp3');
-      this.successSound.preload = 'auto';
-      this.successSound.volume = 0.7;
+      this.clapSound = new Audio('./sfx/clap.mp3');
+      this.clapSound.preload = 'auto';
+      this.clapSound.volume = 0.6;
       
       this.initialized = true;
     } catch (e) {
@@ -39,34 +54,72 @@ class SoundManager {
   }
 
   /**
-   * Play the click sound effect
+   * Play the boop sound effect
+   */
+  playBoop(): void {
+    if (!this.enabled || !this.boopSound) return;
+    
+    try {
+      this.boopSound.currentTime = 0;
+      this.boopSound.play().catch(() => {});
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  /**
+   * Play the crying/no sound for No button
+   */
+  playError(): void {
+    if (!this.enabled || !this.noSound) return;
+    
+    try {
+      this.noSound.currentTime = 0;
+      this.noSound.play().catch(() => {});
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  /**
+   * Play the yeey/celebration sound
+   */
+  playYeey(): void {
+    if (!this.enabled || !this.yeeySound) return;
+    
+    try {
+      this.yeeySound.currentTime = 0;
+      this.yeeySound.play().catch(() => {});
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  /**
+   * Play the click sound effect for pets
    */
   playClick(): void {
     if (!this.enabled || !this.clickSound) return;
     
     try {
       this.clickSound.currentTime = 0;
-      this.clickSound.play().catch(() => {
-        // Silently fail if audio can't play
-      });
+      this.clickSound.play().catch(() => {});
     } catch (e) {
-      // Ignore errors
+      // Silently fail
     }
   }
 
   /**
-   * Play the success sound effect
+   * Play the applause/clapping sound for rewards
    */
-  playSuccess(): void {
-    if (!this.enabled || !this.successSound) return;
+  playClap(): void {
+    if (!this.enabled || !this.clapSound) return;
     
     try {
-      this.successSound.currentTime = 0;
-      this.successSound.play().catch(() => {
-        // Silently fail if audio can't play
-      });
+      this.clapSound.currentTime = 0;
+      this.clapSound.play().catch(() => {});
     } catch (e) {
-      // Ignore errors
+      // Silently fail
     }
   }
 
