@@ -524,66 +524,61 @@ function handleNoClick(): void {
   growYesButton();
   createSadBunny();
   
-  // MOVE THE BUTTON - keep it within viewport bounds
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const btnRect = noBtn.getBoundingClientRect();
-  const btnWidth = btnRect.width;
-  const btnHeight = btnRect.height;
+  // Simple movement using transform only - random offset from original position
+  const offsetX = (Math.random() - 0.5) * 180; // -90 to +90 px
+  const offsetY = (Math.random() - 0.5) * 120; // -60 to +60 px
+  const rotation = (Math.random() - 0.5) * 40; // -20 to +20 degrees
   
-  // Get the button's original position (center of viewport area where it started)
-  const btnOriginalX = btnRect.left + btnWidth / 2;
-  const btnOriginalY = btnRect.top + btnHeight / 2;
+  // Shrink and fade gradually (but keep visible)
+  const shrink = Math.max(0.6, 1 - (noAttempts * 0.04)); // Min 60% size
+  const fade = Math.max(0.5, 1 - (noAttempts * 0.05));   // Min 50% opacity
   
-  // Calculate max offsets to keep at least 20px of button visible
-  const margin = 20;
-  const maxOffsetLeft = -(btnOriginalX - margin - btnWidth / 2);
-  const maxOffsetRight = viewportWidth - btnOriginalX - margin - btnWidth / 2;
-  const maxOffsetTop = -(btnOriginalY - margin - btnHeight / 2);
-  const maxOffsetBottom = viewportHeight - btnOriginalY - margin - btnHeight / 2;
-  
-  // Calculate random offset within bounds
-  const offsetX = Math.random() * (maxOffsetRight - maxOffsetLeft) + maxOffsetLeft;
-  const offsetY = Math.random() * (maxOffsetBottom - maxOffsetTop) + maxOffsetTop;
-  
-  // Calculate shrink and fade (faster - takes 10 clicks)
-  const shrink = Math.max(0.3, 1 - (noAttempts * 0.07));
-  const fade = Math.max(0.2, 1 - (noAttempts * 0.08));
-  const rotation = (Math.random() - 0.5) * 20;
-  
-  // Apply transform to move the button
+  // Apply transform
   noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${shrink}) rotate(${rotation}deg)`;
   noBtn.style.opacity = String(fade);
   
-  // Only disappear after 10 real clicks
+  // After 10 clicks, make button "defeated" but still visible
   if (noAttempts >= 10) {
-    disappearNoButton();
+    defeatNoButton();
   }
 }
 
-// Make the No button disappear with a fun animation!
-function disappearNoButton(): void {
-  noButtonVisible = false;
+// Make the No button "defeated" - still visible but wiggles around
+function defeatNoButton(): void {
   soundManager.playClick();
   
-  // Fun disappearing animation
-  noBtn.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-  noBtn.style.transform = 'scale(0) rotate(720deg)';
-  noBtn.style.opacity = '0';
-  
-  // Show final message
+  // Show victory message
   excuseContainer.style.opacity = '1';
   excuseContainer.style.transform = 'translateY(0)';
-  excuseText.textContent = "🎉 Winnie won! Martha HAS to say Yes to Andrii now! 💕🐰";
+  excuseText.textContent = "🎉 The No button gave up! It's Yes time! 💕🐰";
   
-  // Create celebration
-  confettiManager.burst();
-  heartsManager.burst(10);
+  // Small confetti burst (only 10 particles for performance)
+  confettiManager.burst(undefined, undefined, 10);
   
-  // Remove button after animation
-  setTimeout(() => {
-    noBtn.style.display = 'none';
-  }, 500);
+  // Button becomes smaller and more transparent but still visible
+  noBtn.style.transform = 'translate(0, 0) scale(0.5) rotate(10deg)';
+  noBtn.style.opacity = '0.5';
+  noBtnText.textContent = "😵 I give up!";
+  
+  // Make it continuously dodge on hover/approach
+  noBtn.addEventListener('mouseenter', dodgeFromMouse);
+  noBtn.addEventListener('touchstart', dodgeFromMouse, { passive: true });
+  
+  // Add a wobble animation
+  noBtn.style.animation = 'wobble 0.5s ease-in-out infinite';
+}
+
+// Make the button dodge away from mouse/touch - simple transform version
+function dodgeFromMouse(): void {
+  if (!noButtonVisible) return;
+  
+  // Simple random offset using transform
+  const offsetX = (Math.random() - 0.5) * 150; // -75 to +75 px
+  const offsetY = (Math.random() - 0.5) * 100; // -50 to +50 px
+  const rotation = (Math.random() - 0.5) * 40;
+  
+  noBtn.style.transition = 'transform 0.2s ease-out';
+  noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(0.5) rotate(${rotation}deg)`;
 }
 
 function showExcuse(): void {
@@ -847,10 +842,12 @@ function handlePetBunny(): void {
       petProgressText.textContent = `✨ Another surprise at ${30 - petCount} more pets...`;
     } else if (petCount < 50) {
       petProgressText.textContent = `🎉 Big surprise at ${50 - petCount} more pets...`;
+    } else if (petCount < 100) {
+      petProgressText.textContent = `♾️ Infinite Mode! 👑 Ultimate reward at ${100 - petCount} more pets...`;
     } else {
-      // Infinite love mode text
-      const extraLove = petCount - 50;
-      petProgressText.textContent = `♾️ Infinite Love Mode! +${extraLove} extra love 💕`;
+      // After 100 - true infinite love mode
+      const extraLove = petCount - 100;
+      petProgressText.textContent = `👑 LEGENDARY STATUS! +${extraLove} bonus love 💕`;
     }
   }
   
@@ -923,6 +920,26 @@ function handlePetBunny(): void {
       // Scroll to Venmo surprise
       setTimeout(() => {
         surpriseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }
+  
+  // Reveal the Ultimate Love Certificate at 100 pets!
+  if (petCount === 100) {
+    const certificateContainer = document.getElementById('love-certificate-container');
+    if (certificateContainer) {
+      certificateContainer.classList.remove('hidden');
+      certificateContainer.style.animation = 'bounceIn 0.6s ease-out';
+      confettiManager.celebrate(); // Big celebration!
+      confettiManager.burst();
+      confettiManager.burst();
+      if (petMessage) {
+        petMessage.textContent = "👑 WOW! You're officially the BEST bunny petter! 🏆💕";
+        petMessage.style.opacity = '1';
+      }
+      // Scroll to certificate
+      setTimeout(() => {
+        certificateContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 300);
     }
   }

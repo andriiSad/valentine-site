@@ -430,6 +430,14 @@ html, body {
   75% { transform: translateX(5px) rotate(2deg); }
 }
 
+/* Wobble animation for defeated No button */
+@keyframes wobble {
+  0%, 100% { transform: scale(0.3) rotate(-5deg); }
+  25% { transform: scale(0.35) rotate(5deg); }
+  50% { transform: scale(0.3) rotate(-3deg); }
+  75% { transform: scale(0.32) rotate(3deg); }
+}
+
 #no-btn.shrinking {
   transform: scale(0.8);
   opacity: 0.7;
