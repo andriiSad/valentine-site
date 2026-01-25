@@ -347,6 +347,9 @@ async function init(): Promise<void> {
     updateSoundIcon();
     initBackgroundMusic();
     
+    // Start music immediately
+    startBackgroundMusic();
+    
     // Hide loading screen now that everything is ready
     hideLoadingScreen();
     
@@ -478,7 +481,7 @@ function handleFirstInteraction(): void {
   if (userInteracted) return;
   userInteracted = true;
   soundManager.init();
-  // Auto-start music on first interaction!
+  // Start music on first interaction (any click or keypress)
   startBackgroundMusic();
 }
 
@@ -991,7 +994,8 @@ function hideSection(section: HTMLElement): void {
 function showSection(section: HTMLElement): void {
   section.classList.remove('hidden');
   section.classList.add('fade-in');
-  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Scroll to the very top of the page to show "Yay Martha" section
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   setTimeout(() => section.classList.remove('fade-in'), 600);
 }
 

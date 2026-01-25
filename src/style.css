@@ -10,6 +10,135 @@ body {
   font-family: 'Quicksand', sans-serif;
 }
 
+/* ============================================
+   MOBILE OPTIMIZATIONS
+   ============================================ */
+
+/* Better touch targets for mobile */
+@media (max-width: 640px) {
+  /* Larger touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Reduce padding on small screens */
+  .glass-card {
+    padding: 1.25rem !important;
+  }
+  
+  /* Smaller headings on mobile */
+  h1 {
+    font-size: 2.5rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  h2 {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Stack buttons vertically on mobile */
+  #button-container {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  /* Full width buttons on mobile */
+  #yes-btn, #no-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  /* Smaller emoji decorations on mobile */
+  .text-6xl, .text-7xl, .text-8xl {
+    font-size: 3rem !important;
+  }
+  
+  /* Hide corner decorations on mobile */
+  .fixed.bottom-4, .fixed.top-20 {
+    display: none !important;
+  }
+  
+  /* Reduce floating elements on mobile for better performance */
+  .floating-heart, .floating-bunny {
+    opacity: 0.15;
+  }
+  
+  /* Better spacing for success section */
+  #success-section {
+    padding: 1rem 0.75rem !important;
+  }
+  
+  #success-section .glass-card {
+    padding: 1.5rem !important;
+  }
+  
+  /* Smaller pet bunny area on mobile */
+  #pet-bunny {
+    padding: 1rem !important;
+  }
+  
+  #bunny-emoji {
+    font-size: 3rem !important;
+  }
+  
+  /* Prescription scales better on mobile */
+  #prescription {
+    padding: 1rem !important;
+  }
+  
+  /* Gallery optimizations for mobile */
+  #gallery-section .glass-card {
+    padding: 1rem !important;
+  }
+  
+  /* Music/Sound toggle buttons - better positioning on mobile */
+  #music-toggle, #sound-toggle {
+    padding: 0.5rem !important;
+  }
+  
+  #music-toggle {
+    top: 0.5rem !important;
+    left: 0.5rem !important;
+  }
+  
+  #sound-toggle {
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 {
+    font-size: 3.5rem !important;
+  }
+  
+  h2 {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Safe area padding for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #music-toggle {
+    top: max(1rem, env(safe-area-inset-top)) !important;
+    left: max(1rem, env(safe-area-inset-left)) !important;
+  }
+  
+  #sound-toggle {
+    top: max(1rem, env(safe-area-inset-top)) !important;
+    right: max(1rem, env(safe-area-inset-right)) !important;
+  }
+}
+
 /* Animated Gradient Background */
 .animate-gradient-shift {
   background-size: 400% 400%;
