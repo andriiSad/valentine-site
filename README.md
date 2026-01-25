@@ -208,3 +208,7 @@ MIT License - Feel free to use this for your own Valentine! 💝
 Built with Vite, TypeScript, and Tailwind CSS.
 
 Happy Valentine's Day! 🌹
+
+npm run dev
+brew install cloudflared
+cloudflared tunnel --url http://localhost:5173 -> get the URL from there!
