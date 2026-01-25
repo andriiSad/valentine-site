@@ -1,6 +1,11 @@
 /* Tailwind CSS v4 - must be first */
 @import "tailwindcss";
 
+/* Prevent double-tap zoom on mobile */
+* {
+  touch-action: manipulation;
+}
+
 /* Custom Fonts */
 .font-cursive {
   font-family: 'Dancing Script', cursive;
