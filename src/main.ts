@@ -177,6 +177,7 @@ let hugCount = 0;
 // Milestone unlocks (to prevent multiple triggers)
 let prescriptionUnlocked = false;
 let galleryUnlocked = false;
+let collageUnlocked = false;
 let venmoUnlocked = false;
 let certificateUnlocked = false;
 
@@ -286,6 +287,9 @@ async function discoverGalleryImages(): Promise<string[]> {
 // Store preloaded images for gallery
 let preloadedGalleryImages: string[] = [];
 
+// Preload collage image (shown at 100 points)
+const collageImagePath = './photos/2.jpg';
+
 // Main preload function
 async function preloadAllAssets(): Promise<void> {
   console.log('🚀 Starting asset preload...');
@@ -312,6 +316,10 @@ async function preloadAllAssets(): Promise<void> {
   } else {
     updateLoadingProgress(50, '📷 No photos found, using defaults...');
   }
+  
+  // Preload collage image (for 100 points milestone)
+  updateLoadingProgress(60, '💕 Loading special surprise...');
+  await preloadImage(collageImagePath);
   
   // Step 4: Final setup (100%)
   updateLoadingProgress(90, '✨ Almost ready...');
@@ -857,7 +865,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
   // Show random message based on interaction type
   if (petMessage) {
     let messages: string[];
-    if (petCount > 100) {
+    if (petCount > 150) {
       messages = infiniteLoveMessages;
     } else if (type === 'pet') {
       messages = petMessages;
@@ -871,9 +879,9 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
     setTimeout(() => { petMessage.style.opacity = '0.7'; }, 1500);
   }
   
-  // Update counter - special display after 100
+  // Update counter - special display after 150
   if (petCounterEl) {
-    if (petCount >= 100) {
+    if (petCount >= 150) {
       petCounterEl.textContent = `Infinite Love Mode: ${petCount} points 🐾💕`;
     } else {
       petCounterEl.textContent = `Points: ${petCount} 🐾`;
@@ -884,10 +892,10 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
   const petProgressFill = document.getElementById('pet-progress-fill');
   const petProgressText = document.getElementById('pet-progress-text');
   if (petProgressFill) {
-    const progress = Math.min((petCount / 100) * 100, 100);
+    const progress = Math.min((petCount / 150) * 100, 100);
     petProgressFill.style.width = `${progress}%`;
     // Make progress bar rainbow in infinite mode
-    if (petCount >= 100) {
+    if (petCount >= 150) {
       petProgressFill.style.background = `linear-gradient(90deg, 
         #f43f5e, #ec4899, #8b5cf6, #3b82f6, #10b981, #f59e0b, #f43f5e)`;
       petProgressFill.style.backgroundSize = '200% 100%';
@@ -900,12 +908,14 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
     } else if (petCount < 50) {
       petProgressText.textContent = `✨ Another surprise at ${50 - petCount} more points...`;
     } else if (petCount < 75) {
-      petProgressText.textContent = `� A special reward at ${75 - petCount} more points...`;
+      petProgressText.textContent = `🏆 A special reward at ${75 - petCount} more points...`;
     } else if (petCount < 100) {
-      petProgressText.textContent = `🎉 Big surprise at ${100 - petCount} more points...`;
+      petProgressText.textContent = `🎁 Something special at ${100 - petCount} more points...`;
+    } else if (petCount < 150) {
+      petProgressText.textContent = `🎁 Special gift at ${150 - petCount} more points...`;
     } else {
-      // After 100 - true infinite love mode
-      const extraLove = petCount - 100;
+      // After 150 - true infinite love mode
+      const extraLove = petCount - 150;
       petProgressText.textContent = `👑 LEGENDARY STATUS! +${extraLove} bonus love 💕`;
     }
   }
@@ -917,7 +927,7 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
   }
   
   // Extra effects in infinite mode every 25 points
-  if (petCount > 50 && petCount % 25 === 0) {
+  if (petCount > 75 && petCount % 25 === 0) {
     confettiManager.burst();
     confettiManager.burst();
     heartsManager.burst(10);
@@ -966,8 +976,31 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
     }
   }
   
-  // Reveal the Venmo surprise at 100+ points!
-  if (petCount >= 100 && !venmoUnlocked) {
+  // Reveal the photo collage at 100+ points!
+  if (petCount >= 100 && !collageUnlocked) {
+    collageUnlocked = true;
+    const collageContainer = document.getElementById('collage-container');
+    if (collageContainer) {
+      collageContainer.classList.remove('hidden');
+      collageContainer.style.animation = 'bounceIn 0.6s ease-out';
+      soundManager.playClap();
+      confettiManager.burst();
+      confettiManager.burst();
+      confettiManager.burst(); // Triple confetti!
+      heartsManager.burst(15);
+      if (petMessage) {
+        petMessage.textContent = "📸 You unlocked our photo collage! 💕";
+        petMessage.style.opacity = '1';
+      }
+      // Scroll to collage
+      setTimeout(() => {
+        collageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }
+  
+  // Reveal the Venmo surprise at 150+ points!
+  if (petCount >= 150 && !venmoUnlocked) {
     venmoUnlocked = true;
     const surpriseContainer = document.getElementById('surprise-container');
     if (surpriseContainer) {
@@ -976,10 +1009,11 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       soundManager.playClap();
       confettiManager.burst();
       confettiManager.burst();
-      confettiManager.burst(); // Triple confetti!
-      heartsManager.burst(15);
+      confettiManager.burst();
+      confettiManager.burst(); // Quadruple confetti!
+      heartsManager.burst(20);
       if (petMessage) {
-        petMessage.textContent = "� You deserve something special! Check below! 💕";
+        petMessage.textContent = "🎁 You deserve something special! Check below! 💕";
         petMessage.style.opacity = '1';
       }
       // Scroll to Venmo surprise
