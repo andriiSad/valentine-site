@@ -340,6 +340,9 @@ async function init(): Promise<void> {
   try {
     console.log('🚀 Starting initialization...');
     
+    // Lock scrolling on the initial hero page
+    document.body.classList.add('hero-active');
+    
     // First, preload all assets
     await preloadAllAssets();
     
@@ -387,7 +390,7 @@ async function init(): Promise<void> {
 function initBackgroundMusic(): void {
   backgroundMusic = new Audio('./sfx/background.mp3');
   backgroundMusic.loop = true;
-  backgroundMusic.volume = 0.3;
+  backgroundMusic.volume = 0.12;
 }
 
 function startBackgroundMusic(): void {
@@ -513,6 +516,9 @@ function handleFirstInteraction(): void {
 function handleYesClick(): void {
   soundManager.playYeey();
   
+  // Unlock scrolling for the rest of the site
+  document.body.classList.remove('hero-active');
+  
   // First scroll to love meter so user can see the animation (important for mobile)
   const loveMeterContainer = document.getElementById('love-meter');
   if (loveMeterContainer) {
@@ -629,9 +635,9 @@ function handleNoClick(): void {
   const offsetY = (Math.random() - 0.5) * 120; // -60 to +60 px
   const rotation = (Math.random() - 0.5) * 40; // -20 to +20 degrees
   
-  // Shrink and fade gradually (but keep visible)
-  const shrink = Math.max(0.6, 1 - (noAttempts * 0.04)); // Min 60% size
-  const fade = Math.max(0.5, 1 - (noAttempts * 0.05));   // Min 50% opacity
+  // Shrink and fade gradually (but keep readable)
+  const shrink = Math.max(0.85, 1 - (noAttempts * 0.02)); // Min 85% size
+  const fade = Math.max(0.7, 1 - (noAttempts * 0.03));   // Min 70% opacity
   
   // Apply transform
   noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${shrink}) rotate(${rotation}deg)`;
@@ -655,9 +661,9 @@ function defeatNoButton(): void {
   // Small confetti burst (only 10 particles for performance)
   confettiManager.burst(undefined, undefined, 10);
   
-  // Button becomes smaller and more transparent but still visible
-  noBtn.style.transform = 'translate(0, 0) scale(0.5) rotate(10deg)';
-  noBtn.style.opacity = '0.5';
+  // Button becomes smaller but still readable
+  noBtn.style.transform = 'translate(0, 0) scale(0.8) rotate(5deg)';
+  noBtn.style.opacity = '0.7';
   noBtnText.textContent = "😵 I give up!";
   
   // Make it continuously dodge on hover/approach
@@ -1094,8 +1100,18 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       soundManager.playClap();
       confettiManager.burst();
       heartsManager.burst(8);
+      
+      // Switch background music to Italy theme
+      if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.src = './sfx/italy.mp3';
+        backgroundMusic.volume = 0.12;
+        backgroundMusic.loop = true;
+        backgroundMusic.play().catch(() => {});
+      }
+      
       if (petMessage) {
-        petMessage.textContent = "🎁 You deserve something special! Check below! 💕";
+        petMessage.textContent = "🇮🇹 A little reminder for you, Perfectina Girlfrienda... scroll down! 💕";
         petMessage.style.opacity = '1';
       }
       // Scroll to Venmo surprise
