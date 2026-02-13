@@ -29,23 +29,23 @@ class SoundManager {
     try {
       this.boopSound = new Audio('./sfx/boop.ogg');
       this.boopSound.preload = 'auto';
-      this.boopSound.volume = 0.6;
+      this.boopSound.volume = 0.15;
       
       this.noSound = new Audio('./sfx/no.ogg');
       this.noSound.preload = 'auto';
-      this.noSound.volume = 0.5;
+      this.noSound.volume = 0.12;
       
       this.yeeySound = new Audio('./sfx/yeey.ogg');
       this.yeeySound.preload = 'auto';
-      this.yeeySound.volume = 0.7;
+      this.yeeySound.volume = 0.18;
       
       this.clickSound = new Audio('./sfx/click.ogg');
       this.clickSound.preload = 'auto';
-      this.clickSound.volume = 0.5;
+      this.clickSound.volume = 0.12;
       
       this.clapSound = new Audio('./sfx/clap.mp3');
       this.clapSound.preload = 'auto';
-      this.clapSound.volume = 0.6;
+      this.clapSound.volume = 0.15;
       
       this.initialized = true;
     } catch (e) {

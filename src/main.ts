@@ -170,6 +170,10 @@ let loveMeterValue = 50;
 let heartsSent = 0;
 let backgroundMusic: HTMLAudioElement | null = null;
 let musicPlaying = false;
+let audioContext: AudioContext | null = null;
+let gainNode: GainNode | null = null;
+let musicSourceConnected = false;
+const MUSIC_VOLUME = 0.15;
 let surpriseRevealed = false;
 let petCount = 0;
 let hugCount = 0;
@@ -386,18 +390,40 @@ async function init(): Promise<void> {
 
 // ============================================
 // Background Music - Auto-plays on first interaction
+// Uses Web Audio API GainNode for volume (iOS Safari ignores audio.volume)
 // ============================================
+function initAudioContext(): void {
+  if (audioContext) return;
+  audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  gainNode = audioContext.createGain();
+  gainNode.gain.value = MUSIC_VOLUME;
+  gainNode.connect(audioContext.destination);
+}
+
+function connectMusicToGain(): void {
+  if (!backgroundMusic || !audioContext || !gainNode || musicSourceConnected) return;
+  try {
+    const source = audioContext.createMediaElementSource(backgroundMusic);
+    source.connect(gainNode);
+    musicSourceConnected = true;
+  } catch (_) {
+    // Already connected or error — ignore
+  }
+}
+
 function initBackgroundMusic(): void {
   backgroundMusic = new Audio('./sfx/background.mp3');
   backgroundMusic.loop = true;
-  backgroundMusic.volume = 0.05;
+  backgroundMusic.volume = MUSIC_VOLUME; // Fallback for non-iOS
 }
 
 function startBackgroundMusic(): void {
   if (!backgroundMusic || musicPlaying) return;
-  backgroundMusic.volume = 0.05;
+  initAudioContext();
+  if (audioContext?.state === 'suspended') audioContext.resume();
+  connectMusicToGain();
+  backgroundMusic.volume = MUSIC_VOLUME;
   backgroundMusic.play().then(() => {
-    backgroundMusic!.volume = 0.05;
     musicPlaying = true;
     if (musicIcon) musicIcon.textContent = '🎶';
   }).catch(() => {
@@ -413,7 +439,10 @@ function toggleBackgroundMusic(): void {
     musicPlaying = false;
     if (musicIcon) musicIcon.textContent = '🎵';
   } else {
-    backgroundMusic.volume = 0.05;
+    initAudioContext();
+    if (audioContext?.state === 'suspended') audioContext.resume();
+    connectMusicToGain();
+    backgroundMusic.volume = MUSIC_VOLUME;
     backgroundMusic.play().catch(() => {});
     musicPlaying = true;
     if (musicIcon) musicIcon.textContent = '🎶';
@@ -518,6 +547,7 @@ function handleFirstInteraction(): void {
 // ============================================
 function handleYesClick(): void {
   soundManager.playYeey();
+  soundManager.playClap();
   
   // Unlock scrolling for the rest of the site
   document.body.classList.remove('hero-active');
@@ -1107,9 +1137,14 @@ function handleBunnyInteraction(type: 'pet' | 'blueberry' | 'noseboop', points: 
       // Switch background music to Italy theme
       if (backgroundMusic) {
         backgroundMusic.pause();
-        backgroundMusic.src = './sfx/italy.mp3';
-        backgroundMusic.volume = 0.05;
+        // Create new audio element for Italy music (can't reuse MediaElementSource)
+        backgroundMusic = new Audio('./sfx/italy.mp3');
         backgroundMusic.loop = true;
+        backgroundMusic.volume = MUSIC_VOLUME;
+        musicSourceConnected = false;
+        initAudioContext();
+        if (audioContext?.state === 'suspended') audioContext.resume();
+        connectMusicToGain();
         backgroundMusic.play().catch(() => {});
       }
       
